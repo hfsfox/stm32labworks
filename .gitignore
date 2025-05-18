@@ -44,5 +44,6 @@ CMakeUserPresets.json
 # build dirs
 /build*
 /objects*
+/.cache*
 # CMSIS files
 /CMSIS*
