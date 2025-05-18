@@ -115,16 +115,6 @@ set(SHARED_SRC
     ../CMSIS/Device/ST/STM32F4/Source/Templates/system_stm32f4xx.c
     )
 
-#add_hexfile(${CMAKE_PROJECT_NAME}_LR0
-#    Lab1/LR1.c
-#    ${SHARED_SRC}
-#)
-
-#add_firmware(${CMAKE_PROJECT_NAME}_LR1
-#    Lab1/LR1.c
-#    ${SHARED_SRC}
-#)
-
 add_subdirectory(Lab1)
 add_subdirectory(Lab2)
 add_subdirectory(Lab3)
