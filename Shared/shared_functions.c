@@ -1,4 +1,5 @@
 #include <shared_functions.h>
+#include <compiler_macro.h>
 
 inline void _work_fq_setup(void)
 {
@@ -21,7 +22,7 @@ inline void _work_fq_setup(void)
 
 inline void _set_dsb(void)
 {
-    #if defined (__GNUC__) || defined(__clang__)
+    #if defined (COMPILER_CLANG) || defined (COMPILER_GCC)
     __asm volatile (
         "dsb 0xF":::"memory"
         );
@@ -31,7 +32,7 @@ inline void _set_dsb(void)
 inline void _delay(volatile uint32_t ms) {
     while (ms--)
     {
-        #if defined (__GNUC__) || defined(__clang__)
+        #if defined (COMPILER_CLANG) || defined (COMPILER_GCC)
             __asm volatile
             (
                 "nop"
