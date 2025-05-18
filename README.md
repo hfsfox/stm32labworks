@@ -1,8 +1,14 @@
 # stm32labworks
 Lab works and experiments with STM32F401xx MCU
 
-For setup your build envirioment:
+To build this you need installed:
+```
+git
+CMake => 3.30
+arm-none-eabi-gcc
+```
 
+For setup your build envirioment:
 ```
 git clone https://github.com/ARM-software/CMSIS_5.git CMSIS
 cd CMSIS
