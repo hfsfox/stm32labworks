@@ -56,8 +56,9 @@ include(STM32Firmware)
 if(CMAKE_BUILD_STM32F103C8T6)
     set(TARGET_FLAGS "-mcpu=cortex-m3")
     add_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC
-    USE_HAL_DRIVER
+    #USE_HAL_DRIVER
 	STM32F103xB
+	__TARGET_STM32F103C8T6__
     )
 
 else()
@@ -66,6 +67,7 @@ else()
     #USE_HAL_DRIVER
     #STM32F4xx
     STM32F411xE
+    __TARGET_STM32F401CEU6__
     )
 endif()
 
@@ -103,11 +105,27 @@ message(STATUS "Target arch:            ${CMAKE_SYSTEM_PROCESSOR}")
 message(STATUS "Build type:             ${CMAKE_BUILD_TYPE}")
 message(STATUS "Build flags:            ${CMAKE_CXX_FLAGS}")
 
+if(CMAKE_BUILD_STM32F103C8T6)
+include_directories(${CMAKE_PROJECT_NAME} PUBLIC
+    include
+    CMSIS/CMSIS/Core/Include
+    CMSIS/Device/ST/STM32F1/Include
+    )
+else()
 include_directories(${CMAKE_PROJECT_NAME} PUBLIC
     include
     CMSIS/CMSIS/Core/Include
     CMSIS/Device/ST/STM32F4/Include
 )
+endif()
+
+if(CMAKE_BUILD_STM32F103C8T6)
+set(SHARED_SRC
+    ../Shared/shared_functions.c
+    #../Shared/startup_stm32f103xb.c
+    ../CMSIS/Device/ST/STM32F1/Source/Templates/system_stm32f1xx.c
+    )
+endif()
 
 set(SHARED_SRC
     ../Shared/shared_functions.c
