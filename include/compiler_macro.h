@@ -59,3 +59,11 @@
 #else
 #warning "Unsupported compiler!"
 #endif
+
+#if defined (COMPILER_CLANG) || defined (COMPILER_GCC)
+#define unused_var __attribute__ ((unused))
+#elif defined (COMPILER_MSVC)
+#define unused_var __declspec(unused)
+#endif
+
+

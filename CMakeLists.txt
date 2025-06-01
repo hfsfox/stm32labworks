@@ -91,7 +91,11 @@ endif()
 set(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp -MMD -MP")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -fno-rtti -fno-exceptions -fno-threadsafe-statics")
 set(CMAKE_C_LINK_FLAGS "${TARGET_FLAGS}")
-set(CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS} -T \"${CMAKE_SOURCE_DIR}/Shared/linker_script.ld\"")
+if(CMAKE_BUILD_STM32F103C8T6)
+set(CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS} -T \"${CMAKE_SOURCE_DIR}/Shared/stm32f103c8tx_linker_script.ld\"")
+else()
+set(CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS} -T \"${CMAKE_SOURCE_DIR}/Shared/linker_script_f4.ld\"")
+endif()
 set(CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS} --specs=nano.specs")
 set(CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS} -Wl,-Map=${CMAKE_PROJECT_NAME}.map -Wl,--gc-sections")
 set(CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS} -Wl,--start-group -lc -lm -Wl,--end-group")
@@ -103,7 +107,9 @@ message(STATUS "Target platform:        ${CMAKE_SYSTEM_NAME}")
 message(STATUS "Compiler:               ${CMAKE_CXX_COMPILER_ID}")
 message(STATUS "Target arch:            ${CMAKE_SYSTEM_PROCESSOR}")
 message(STATUS "Build type:             ${CMAKE_BUILD_TYPE}")
-message(STATUS "Build flags:            ${CMAKE_CXX_FLAGS}")
+message(STATUS "Build C flags:          ${CMAKE_C_FLAGS}")
+message(STATUS "Build CXX flags:        ${CMAKE_CXX_FLAGS}")
+message(STATUS "Link flags:             ${CMAKE_C_LINK_FLAGS}")
 
 if(CMAKE_BUILD_STM32F103C8T6)
 include_directories(${CMAKE_PROJECT_NAME} PUBLIC
@@ -123,15 +129,16 @@ if(CMAKE_BUILD_STM32F103C8T6)
 set(SHARED_SRC
     ../Shared/shared_functions.c
     #../Shared/startup_stm32f103xb.c
+    ../Shared/startup_stm32f103xb.s
     ../CMSIS/Device/ST/STM32F1/Source/Templates/system_stm32f1xx.c
     )
-endif()
-
+else()
 set(SHARED_SRC
     ../Shared/shared_functions.c
     ../Shared/startup_stm32f411xx.c
     ../CMSIS/Device/ST/STM32F4/Source/Templates/system_stm32f4xx.c
     )
+endif()
 
 add_subdirectory(Lab1)
 add_subdirectory(Lab2)
@@ -141,3 +148,4 @@ add_subdirectory(Lab5)
 add_subdirectory(Lab6)
 add_subdirectory(Lab7)
 add_subdirectory(Lab8)
+add_subdirectory(CW1)

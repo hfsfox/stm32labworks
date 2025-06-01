@@ -1,6 +1,12 @@
 #include <shared_functions.h>
 #include <compiler_macro.h>
 
+#if defined (__TARGET_STM32F401CEU6__)
+#include <stm32f4xx.h>
+#elif defined (__TARGET_STM32F103C8T6__)
+#include <stm32f1xx.h>
+#endif
+
 inline void _work_fq_setup(void)
 {
     /*
@@ -20,6 +26,7 @@ inline void _work_fq_setup(void)
     */
 }
 
+#if !defined (__TARGET_STM32F103C8T6__)
 inline void _set_dsb(void)
 {
     #if defined (COMPILER_CLANG) || defined (COMPILER_GCC)
@@ -28,15 +35,38 @@ inline void _set_dsb(void)
         );
     #endif
 }
+#endif
 
-inline void _delay(volatile uint32_t ms) {
-    while (ms--)
+inline void _delay_msecs(volatile uint32_t ms) {
+    MODIFY_REG(SysTick->VAL,SysTick_VAL_CURRENT_Msk,SYSCLOCK / 1000 - 1);
+    volatile uint32_t SysTick_CNT = 0;
+    SysTick_CNT = ms;
+    while(SysTick_CNT)
     {
-        #if defined (COMPILER_CLANG) || defined (COMPILER_GCC)
-            __asm volatile
+        __asm volatile
             (
                 "nop"
             );
-        #endif
+    }
+}
+
+inline void _delay_usecs(volatile uint32_t ms) {
+    MODIFY_REG(SysTick->VAL,SysTick_VAL_CURRENT_Msk,SYSCLOCK / 1000000 - 1);
+    volatile uint32_t SysTick_CNT = 0;
+    SysTick_CNT = ms;
+    while(SysTick_CNT)
+    {
+        __asm volatile
+            (
+                "nop"
+            );
+    }
+}
+
+inline void _delay_ticks(volatile uint32_t ticks)
+{
+    while (ticks)
+    {
+        ticks--;
     }
 }
