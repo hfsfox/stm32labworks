@@ -60,9 +60,9 @@
 #warning "Unsupported compiler!"
 #endif
 
-#if defined (COMPILER_CLANG) || defined (COMPILER_GCC)
+#if defined (COMPILER_CLANG) || defined (COMPILER_GCC) || defined (COMPILER_ICC)
 #define unused_var __attribute__ ((unused))
-#elif defined (COMPILER_MSVC)
+#elif defined (COMPILER_MSVC) || defined __CYGWIN__
 #define unused_var __declspec(unused)
 #endif
 
