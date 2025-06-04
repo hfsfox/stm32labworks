@@ -38,7 +38,8 @@ inline void _set_dsb(void)
 #endif
 
 inline void _delay_msecs(volatile uint32_t ms) {
-    MODIFY_REG(SysTick->VAL,SysTick_VAL_CURRENT_Msk,SYSCLOCK / 1000 - 1);
+    //MODIFY_REG(SysTick->VAL,SysTick_VAL_CURRENT_Msk,SYSCLOCK / 1000 - 1);
+    SysTick->VAL = (SysTick->VAL & ~SysTick_VAL_CURRENT_Msk) | (SYSCLOCK / 1000 - 1);
     volatile uint32_t SysTick_CNT = 0;
     SysTick_CNT = ms;
     while(SysTick_CNT)
@@ -51,7 +52,8 @@ inline void _delay_msecs(volatile uint32_t ms) {
 }
 
 inline void _delay_usecs(volatile uint32_t ms) {
-    MODIFY_REG(SysTick->VAL,SysTick_VAL_CURRENT_Msk,SYSCLOCK / 1000000 - 1);
+    //MODIFY_REG(SysTick->VAL,SysTick_VAL_CURRENT_Msk,SYSCLOCK / 1000000 - 1);
+    SysTick->VAL = (SysTick->VAL & ~SysTick_VAL_CURRENT_Msk) | (SYSCLOCK / 1000000 - 1);
     volatile uint32_t SysTick_CNT = 0;
     SysTick_CNT = ms;
     while(SysTick_CNT)
@@ -65,6 +67,7 @@ inline void _delay_usecs(volatile uint32_t ms) {
 
 inline void _delay_ticks(volatile uint32_t ticks)
 {
+    SysTick->VAL = (SysTick->VAL & ~SysTick_VAL_CURRENT_Msk) | (SYSCLOCK);
     while (ticks)
     {
         ticks--;

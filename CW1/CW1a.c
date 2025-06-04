@@ -1,8 +1,16 @@
-/**
- * Copyright (C) 2025 Kravchuk Roman <darkkitsunezx128k2309@gmail.com>
+/*Copyright (C) 2025 Kravchuk Roman <darkkitsunezx128k2309@gmail.com>
  * All rights reserved. Distributed under the terms of the MIT License.
- * Course work 1 -- FqMeter
+ * STM32F103C8T6 Frequency Meter Implementation
+ * Using CMSIS Library Only
+ *
+ * Features:
+ * - Frequency measurement using Timer Input Capture
+ * - 4-digit 7-segment LED display
+ * - LED indicators for frequency divider status
+ * - Two-button control panel (Reset/Set Divider)
+ * - Multiple frequency ranges with automatic scaling
  */
+
 
 #if defined (__TARGET_STM32F401CEU6__)
 #include <stm32f4xx.h>
@@ -10,8 +18,15 @@
 #include <stm32f1xx.h>
 #endif
 #include <shared_functions.h>
+#include <stdint.h>
+#include <stdbool.h>
 
+volatile uint32_t period = 0;
+volatile uint32_t overflow_counter = 0;
+volatile uint32_t last_capture = 0;
 
+// from HAL
+#if defined (__TARGET_STM32F103C8T6__)
 #define GPIO_PIN_0                 ((uint16_t)0x0001)  /* Pin 0 selected    */
 #define GPIO_PIN_1                 ((uint16_t)0x0002)  /* Pin 1 selected    */
 #define GPIO_PIN_2                 ((uint16_t)0x0004)  /* Pin 2 selected    */
@@ -29,93 +44,10 @@
 #define GPIO_PIN_14                ((uint16_t)0x4000)  /* Pin 14 selected   */
 #define GPIO_PIN_15                ((uint16_t)0x8000)  /* Pin 15 selected   */
 #define GPIO_PIN_All               ((uint16_t)0xFFFF)  /* All pins selected */
+#endif
 
-#define GPIO_PIN_MASK              0x0000FFFFu /* PIN mask for assert test */
-
-/*void
-timer_setup(void)
-{
-    #if defined (__TARGET_STM32F401CEU6__)
-    #endif
-}*/
-
-/*void
-gpio_setup(void)
-{
-}*/
-
-/*void
-fq_meter(void)
-{
-    #if defined (__TARGET_STM32F401CEU6__)
-    #endif
-}*/
-
-//int main(void)
-//{
-    /*#if defined (__TARGET_STM32F401CEU6__)
-    // enable GPIOA and TIM2
-    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
-    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
-
-    GPIOA->MODER |= 0x2; // PA0 in alternate function mode
-
-    // clear pin 0 (first bit) alternate function and
-    // initialize to AF01 (TIM2 CH1)
-    GPIOA->AFR[0] |= (uint8_t)1;
-
-    // configure timer
-    TIM2->PSC = 1000; // clear prescaler
-    TIM2->ARR = 200; // set period (Auto Reload Register)
-
-    // configure capture/compare 1
-    TIM2->CCMR1 |= 0x60; // PWM1 mode
-    TIM2->CCR1 = 100; // pulse width in cycles
-    TIM2->CCER |= 1;  // enable cc1
-
-    // enable TIM1
-    TIM2->CR1 |= TIM_CR1_CEN;
-    #endif
-
-    for(;;)
-    {
-        for(uint16_t i=0; i == sizeof(uint16_t); i++)
-        {
-            //WRITE_REG(TIM2->CCR3, i);
-            TIM2->CCR3 = i;
-            _delay_msecs(10);
-        }
-    };*/
-//}
-
-/*int main(void)
-{
-    for(;;)
-    {
-        //_delay_msecs(100);
-        //_delay_msecs(100);
-    }
-}*/
-
-
-/*
- * STM32F103C8T6 Frequency Meter Implementation
- * Using CMSIS Library Only
- *
- * Features:
- * - Frequency measurement using Timer Input Capture
- * - 4-digit 7-segment LED display
- * - LED indicators for frequency divider status
- * - Two-button control panel (Reset/Set Divider)
- * - Multiple frequency ranges with automatic scaling
- */
-
-#include <stdint.h>
-#include <stdbool.h>
-
-#if defined (__TARGET_STM32F103C8T6__)
 // Configuration Constants
-#define SYSTEM_CLOCK        72000000    // 72MHz system clock
+//#define SYSTEM_CLOCK        72000000    // 72MHz system clock
 #define MEASUREMENT_PERIOD  1000        // 1 second measurement window (ms)
 #define DEBOUNCE_TIME       50          // Button debounce time (ms)
 
@@ -156,7 +88,7 @@ fq_meter(void)
 // Global Variables
 volatile uint32_t frequency = 0;
 volatile uint32_t pulse_count = 0;
-volatile uint32_t last_capture = 0;
+//volatile uint32_t last_capture = 0;
 volatile bool measurement_ready = false;
 
 typedef enum {
@@ -195,7 +127,7 @@ void clear_display(void);
 void update_leds(void);
 void process_buttons(void);
 uint32_t read_button(GPIO_TypeDef* port, uint16_t pin);
-void delay_ms(uint32_t ms);
+//void delay_ms(uint32_t ms);
 
 // System Initialization
 void system_init(void) {
@@ -277,7 +209,7 @@ void timer_init(void) {
 
 // SysTick Initialization for Display Multiplexing
 void systick_init(void) {
-    SysTick->LOAD = (SYSTEM_CLOCK / 1000) - 1; // 1ms tick
+    SysTick->LOAD = (SYSCLOCK / 1000) - 1; // 1ms tick
     SysTick->VAL = 0;
     SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk;
 }
@@ -399,12 +331,12 @@ void process_buttons(void) {
 }
 
 // Delay Function
-void delay_ms(uint32_t ms) {
+/*void delay_ms(uint32_t ms) {
     uint32_t start = SysTick->VAL;
-    uint32_t ticks = ms * (SYSTEM_CLOCK / 1000);
+    uint32_t ticks = ms * (SYSCLOCK / 1000);
 
     while ((start - SysTick->VAL) < ticks);
-}
+}*/
 
 // Timer 1 Capture/Compare Interrupt Handler
 void TIM1_CC_IRQHandler(void) {
@@ -467,7 +399,7 @@ int main(void) {
 
     // Display startup pattern
     display_value = 8888;
-    delay_ms(100);
+    _delay_msecs(1000);
     display_value = 0;
 
     while (1) {
@@ -512,4 +444,3 @@ int main(void) {
  * - Interrupt-driven measurement
  * - Low power design with WFI
  */
-#endif
