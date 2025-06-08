@@ -27,3 +27,5 @@ void _delay_ticks(volatile uint32_t ticks);
 void _delay_msecs(volatile uint32_t ms);
 void _delay_usecs(volatile uint32_t ms);
 void _work_fq_setup(void);
+void _sys_init_external_clk(void);
+void _sys_init_internal_clk(void);

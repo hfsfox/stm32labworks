@@ -62,6 +62,7 @@
 
 #if defined (COMPILER_CLANG) || defined (COMPILER_GCC) || defined (COMPILER_ICC)
 #define unused_var __attribute__ ((unused))
+#define inline_code __attribute__((always_inline))
 #elif defined (COMPILER_MSVC) || defined __CYGWIN__
 #define unused_var __declspec(unused)
 #endif

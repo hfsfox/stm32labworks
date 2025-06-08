@@ -27,7 +27,8 @@ inline void _work_fq_setup(void)
 }
 
 #if !defined (__TARGET_STM32F103C8T6__)
-inline void _set_dsb(void)
+inline inline_code void
+_set_dsb(void)
 {
     #if defined (COMPILER_CLANG) || defined (COMPILER_GCC)
     __asm volatile (
@@ -37,7 +38,26 @@ inline void _set_dsb(void)
 }
 #endif
 
-inline void _delay_msecs(volatile uint32_t ms) {
+inline inline_code void
+_sys_init_external_clk(void)
+{
+    RCC->CR |= RCC_CR_HSEON;                           // Enable HSE
+    while(!(RCC->CR & RCC_CR_HSERDY));                 // Wait HSE ready
+    RCC->CFGR |= RCC_CFGR_SW_HSE;                      // Select HSE as sysclk
+    SystemCoreClockUpdate();                           // Update core clock variable
+}
+
+inline inline_code void
+_sys_init_internal_clk(void)
+{
+    RCC->CR |= RCC_CR_HSION;                           // Enable HSI
+    while(!(RCC->CR & RCC_CR_HSIRDY));                 // Wait HSI ready
+    RCC->CFGR |= RCC_CFGR_SW_HSI;                      // Select HSI as sysclk
+    SystemCoreClockUpdate();                           // Update core clock variable
+}
+
+inline inline_code void
+_delay_msecs(volatile uint32_t ms) {
     //MODIFY_REG(SysTick->VAL,SysTick_VAL_CURRENT_Msk,SYSCLOCK / 1000 - 1);
     SysTick->VAL = (SysTick->VAL & ~SysTick_VAL_CURRENT_Msk) | (SYSCLOCK / 1000 - 1);
     volatile uint32_t SysTick_CNT = 0;
@@ -51,7 +71,8 @@ inline void _delay_msecs(volatile uint32_t ms) {
     }
 }
 
-inline void _delay_usecs(volatile uint32_t ms) {
+inline inline_code void
+_delay_usecs(volatile uint32_t ms) {
     //MODIFY_REG(SysTick->VAL,SysTick_VAL_CURRENT_Msk,SYSCLOCK / 1000000 - 1);
     SysTick->VAL = (SysTick->VAL & ~SysTick_VAL_CURRENT_Msk) | (SYSCLOCK / 1000000 - 1);
     volatile uint32_t SysTick_CNT = 0;
@@ -65,7 +86,8 @@ inline void _delay_usecs(volatile uint32_t ms) {
     }
 }
 
-inline void _delay_ticks(volatile uint32_t ticks)
+inline inline_code void
+_delay_ticks(volatile uint32_t ticks)
 {
     SysTick->VAL = (SysTick->VAL & ~SysTick_VAL_CURRENT_Msk) | (SYSCLOCK);
     while (ticks)
