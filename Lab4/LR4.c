@@ -10,6 +10,7 @@
 #include <stm32f1xx.h>
 #endif
 #include <shared_functions.h>
+#include <gpio_pins.h>
 
 int main(void)
 {
