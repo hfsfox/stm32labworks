@@ -3,12 +3,22 @@
 #include <stdbool.h>
 
 /*
+ *  Частотомір з динамічною індикацією
+ *
  * Підключення:
  * 7-сегментний дисплей з спільним катодом:
  * - сегменти A-G, DP: PB0-PB7
  * - розряд 1-4: PA4-PA7 (active low)
  * Вхід сигналу:
  * - PA8 (Timer 1 Channel 1)
+ * Control Panel:
+ * - Кнопка перезапуску: PA0 (active low, internal pull-up)
+ * - Кнопка вибору дільника: PA1 (active low, internal pull-up)
+ *
+ * LED індикатори дільника:
+ * - Divider x1: PC13 (active low)
+ * - Divider x10: PC14 (active low)
+ * - Divider x100: PC15 (active low)
  *
  */
 
