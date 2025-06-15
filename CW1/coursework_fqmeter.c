@@ -7,6 +7,8 @@
  * 7-сегментний дисплей з спільним катодом:
  * - сегменти A-G, DP: PB0-PB7
  * - розряд 1-4: PA4-PA7 (active low)
+ * Вхід сигналу:
+ * - PA8 (Timer 1 Channel 1)
  *
  */
 
@@ -60,6 +62,47 @@ SysInitExternalClock(void)
     while(!(RCC->CR & RCC_CR_HSERDY));                 // Чекати поки HSE буде готовий
     RCC->CFGR |= RCC_CFGR_SW_HSE;                      // Select HSE як системний тактовий генератор
     SystemCoreClockUpdate();                           // оновити змінну clock ядра
+}
+
+// Функція затримки в мілісекундах
+inline void
+delay_msecs(volatile uint32_t ms) {
+    //MODIFY_REG(SysTick->VAL,SysTick_VAL_CURRENT_Msk,SYSCLOCK / 1000 - 1);
+    SysTick->VAL = (SysTick->VAL & ~SysTick_VAL_CURRENT_Msk) | (SYSCLOCK / 1000 - 1);
+    volatile uint32_t SysTick_CNT = 0;
+    SysTick_CNT = ms;
+    while(SysTick_CNT)
+    {
+        __asm volatile
+            (
+                "nop" // вимкнення оптимізації для циклів комплілятора
+            );
+    }
+}
+
+// Функція затримки в мікросекундах
+inline void
+delay_usecs(volatile uint32_t ms) {
+    SysTick->VAL = (SysTick->VAL & ~SysTick_VAL_CURRENT_Msk) | (SYSCLOCK / 1000000 - 1);
+    volatile uint32_t SysTick_CNT = 0;
+    SysTick_CNT = ms;
+    while(SysTick_CNT)
+    {
+        __asm volatile
+            (
+                "nop" // вимкнення оптимізації для циклів комплілятора
+            );
+    }
+}
+// Затримка в процесорних тактах
+inline void
+delay_ticks(volatile uint32_t ticks)
+{
+    SysTick->VAL = (SysTick->VAL & ~SysTick_VAL_CURRENT_Msk) | (SYSCLOCK);
+    while (ticks)
+    {
+        ticks--;
+    }
 }
 
 
