@@ -26,17 +26,17 @@ inline void _work_fq_setup(void)
     */
 }
 
-#if !defined (__TARGET_STM32F103C8T6__)
 inline inline_code void
 _set_dsb(void)
 {
-    #if defined (COMPILER_CLANG) || defined (COMPILER_GCC)
-    __asm volatile (
-        "dsb 0xF":::"memory"
-        );
+    #if defined (__TARGET_STM32F401CEU6__) || !defined (__TARGET_STM32F103C8T6__)
+        #if defined (COMPILER_CLANG) || defined (COMPILER_GCC)
+        __asm volatile (
+            "dsb 0xF":::"memory"
+            );
+        #endif
     #endif
 }
-#endif
 
 inline inline_code void
 _sys_init_external_clk(void)
