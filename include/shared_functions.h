@@ -14,12 +14,16 @@
 #undef SYSCLOCK
 #endif
 
+#define SYSCLOCK_BASE 8000000U
+
 #if defined (__TARGET_STM32F103C8T6__)
 #define SYSCLOCK 72000000U
 #elif defined (__TARGET_STM32F401CEU6__)
 #define SYSCLOCK 84000000U
+#elif defined (__TARGET_STM32F411CCU6__)
+#define SYSCLOCK 100000000U
 #else
-#define SYSCLOCK 8000000U
+#define SYSCLOCK SYSCLOCK_BASE
 #endif
 
 void _set_dsb(void);
